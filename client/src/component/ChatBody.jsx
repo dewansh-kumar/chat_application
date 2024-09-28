@@ -10,7 +10,7 @@ import { getDate, getTheActualDate, getTime } from "../utils/dateAndTime.js";
 import { getMessages } from "../service/api.jsx";
 import { onDeleteMessage } from "../service/socket.js";
 
- const ChatBody = () => {
+const ChatBody = () => {
   const [messages, setMessages] = useRecoilState(messagesAtomState);
   const currentUser = useRecoilValue(currentUserAtomState);
   const selectedUser = useRecoilValue(selectedUserAtomState);
@@ -102,9 +102,9 @@ import { onDeleteMessage } from "../service/socket.js";
           return (
             <div key={item.messageId}>
               {shouldShowDate && (
-                <div className="text-center text-gray-400 text-xs mb-4">
+                <p className="text-center text-gray-500 text-xs mb-4 font-bold">
                   {getTheActualDate(item.timestamp)}
-                </div>
+                </p>
               )}
 
               {(item.sender === currentUser._id || !item.deletedByReceiver) && (

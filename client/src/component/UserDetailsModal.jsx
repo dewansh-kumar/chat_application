@@ -91,7 +91,7 @@ const UserDetailsModal = ({ isOpen, onClose, selectedUser }) => {
 
       setRequests(updatedRequests);
 
-      acceptRequest(selectedUser.userName, friend.data.data);
+      acceptRequest(friend.data.data, selectedUser.userName);
     } catch (error) {
       console.error("Failed to accept the friend request:", error);
     }
@@ -104,7 +104,7 @@ const UserDetailsModal = ({ isOpen, onClose, selectedUser }) => {
         return request.requestInfo.userName !== selectedUser.userName;
       });
       setRequests(updatedRequests);
-      rejectRequest(selectedUser.userName, currentUser.userName);
+      rejectRequest(currentUser.userName, selectedUser.userName);
     } catch (error) {
       console.error("Getting error while rejecting the request ", error);
     }
@@ -121,7 +121,7 @@ const UserDetailsModal = ({ isOpen, onClose, selectedUser }) => {
         return [...previous, { userName: selectedUser.userName }];
       });
 
-      sendRequest(selectedUser.userName, sendNewRequest.data.data);
+      sendRequest(sendNewRequest.data.data, selectedUser.userName);
     } catch (error) {
       console.error("Failed to send the request: ", error);
     }
@@ -135,7 +135,7 @@ const UserDetailsModal = ({ isOpen, onClose, selectedUser }) => {
           return item.userName !== selectedUser.userName;
         });
       });
-      unSendRequest(selectedUser.userName, currentUser.userName);
+      unSendRequest(currentUser.userName, selectedUser.userName);
     } catch (error) {
       console.error("Getting error while UnSending the request ", error);
     }

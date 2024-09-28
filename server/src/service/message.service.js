@@ -3,6 +3,18 @@ import http from "http";
 import { Server } from "socket.io";
 import { Message } from "../model/message.model.js";
 import { sendRequest } from "../controller/friend.controller.js";
+import {
+  acceptRequestPublisher,
+  deleteMessagePublisher,
+  disconnectUserPublisher,
+  rejectRequestPublisher,
+  sendMessagePublisher,
+  sendRequestPublisher,
+  stopTypingMessagePublisher,
+  typingMessagePublisher,
+  unFriendRequestPublisher,
+  unSendRequestPublisher,
+} from "../redis/redisPublisher.js";
 
 const server = http.createServer(app);
 const io = new Server(server, {
@@ -13,6 +25,7 @@ const io = new Server(server, {
 
 // Store connected users with their socket IDs
 const users = {};
+
 
 io.on("connection", (socket) => {
   console.log("A user connected:", socket.id);
@@ -36,116 +49,143 @@ io.on("connection", (socket) => {
       senderId,
       receiverId,
     }) => {
-      const receiverSocketId = users[receiver];
+      // const receiverSocketId = users[receiver];
 
-      if (receiverSocketId) {
-        console.log("Send the message")
-        io.to(receiverSocketId).emit("private_message", {
-          receiverId,
-          senderId,
-          message,
-          messageId,
-          timestamp,
-        });
-      } else {
-        console.log(`Receiver ${receiver} not online`);
-      }
+      // if (receiverSocketId) {
+      //   console.log("Send the message")
+      //   io.to(receiverSocketId).emit("private_message", {
+      //     receiverId,
+      //     senderId,
+      //     message,
+      //     messageId,
+      //     timestamp,
+      //   });
+      // } else {
+      //   console.log(`Receiver ${receiver} not online`);
+      // }
 
-      const newMessage = new Message({
-        sender: senderId,
-        receiver: receiverId,
+      // const newMessage = new Message({
+      //   sender: senderId,
+      //   receiver: receiverId,
+      //   messageId,
+      //   message,
+      //   timestamp,
+      // });
+      // await newMessage.save();
+
+      const messageObj = {
+        receiver,
         messageId,
         message,
         timestamp,
-      });
-      await newMessage.save();
+        receiverId,
+        senderId,
+      };
+
+      // console.log("Sending message aa rha fj")
+
+      await sendMessagePublisher(messageObj);
     }
   );
 
   // Handle typing status
-  socket.on("typing", ({ sender, recipient }) => {
-    const recipientSocketId = users[recipient];
-    if (recipientSocketId) {
-      
-      io.to(recipientSocketId).emit("typing", { sender });
-    }
+  socket.on("typing", async ({ sender, receiver }) => {
+    // const recipientSocketId = users[recipient];
+    // if (recipientSocketId) {
+    //   io.to(recipientSocketId).emit("typing", { sender });
+    // }
+
+    await typingMessagePublisher({ sender, receiver });
   });
 
-  socket.on("stop_typing", ({ sender, recipient }) => {
-    const recipientSocketId = users[recipient];
-    if (recipientSocketId) {
-      io.to(recipientSocketId).emit("stop_typing", { sender });
-    }
+  socket.on("stop_typing", async ({ sender, receiver }) => {
+    // const recipientSocketId = users[recipient];
+    // if (recipientSocketId) {
+    //   io.to(recipientSocketId).emit("stop_typing", { sender });
+    // }
+    await stopTypingMessagePublisher({ sender, receiver });
   });
 
   // Handle user going offline
-  socket.on("user_offline", (username) => {
+  socket.on("user_offline", async(username) => {
     if (users[username]) {
       delete users[username];
-      io.emit("user_offline", username);
+      // io.emit("user_offline", username);
+      await disconnectUserPublisher({username})
       console.log("User offline:", username);
     }
   });
 
-  socket.on("call-user", ({ from, to, signal }) => {
-    if (users[to]) {
-      io.to(users[to]).emit("call-made", { signal, from });
-    }
+  socket.on("send_request", async ({ requestedBy, requestedTo }) => {
+    // io.to(users[requestedTo]).emit("send_request", { request });
+    // const receiverSocketId = users[requestedTo];
+
+    const infoObj = {
+      sender: requestedBy,
+      receiver: requestedTo,
+    };
+    await sendRequestPublisher(infoObj);
+    // console.log("send request ", receiverSocketId)
   });
 
-  // Handle call acceptance
-  socket.on("accept-call", ({ signal, to }) => {
-    io.to(users[to]).emit("call-accepted", signal);
+  socket.on("accept_request", async ({ requestedBy, requestedTo }) => {
+    // io.to(users[requestedTo]).emit("accept_request", { requestedBy });
+    const infoObj = {
+      sender: requestedBy,
+      receiver: requestedTo,
+    };
+    await acceptRequestPublisher(infoObj);
   });
 
-  // Handle call rejection
-  socket.on("reject-call", ({ to }) => {
-    io.to(users[to]).emit("call-rejected");
+  socket.on("reject_request", async ({ requestedBy, requestedTo }) => {
+    // io.to(users[requestedBy]).emit("reject_request", { requestedTo });
+    const infoObj = {
+      sender: requestedBy,
+      receiver: requestedTo,
+    };
+
+    await rejectRequestPublisher(infoObj);
   });
 
-  // Handle call end
-  socket.on("end-call", ({ from, to }) => {
-    if (users[to]) {
-      io.to(users[to]).emit("call-ended", { from });
-    }
-    if (users[from]) {
-      io.to(users[from]).emit("call-ended", { from: to });
-    }
+  socket.on("unSend_request", async ({ requestedTo, requestedBy }) => {
+    // io.to(users[requestedTo]).emit("unsend_request", { requestedBy });
+    // console.log("unsend request ", requestedBy, requestedTo)
+    const infoObj = {
+      sender: requestedBy,
+      receiver: requestedTo,
+    };
+    await unSendRequestPublisher(infoObj);
   });
 
-  socket.on("accept-request", async ({ requestedBy, friend }) => {
-    io.to(users[requestedBy]).emit("accept-request", { friend });
+  socket.on("unfriend_request", async ({ requestedBy, requestedTo }) => {
+    // io.to(users[to]).emit("unfriend_request", { from });
+
+    const infoObj = {
+      sender: requestedBy,
+      receiver: requestedTo,
+    };
+
+    await unFriendRequestPublisher(infoObj);
   });
 
-  socket.on("reject-request", async ({ requestedBy, requestedTo }) => {
-    console.log(requestedBy, requestedTo);
-    io.to(users[requestedBy]).emit("reject-request", { requestedTo });
-  });
+  socket.on("delete_message", async ({ from, to, messageId }) => {
+    io.to(users[to]).emit("delete_message", { from, messageId });
+    const infoObj = {
+      sender: from,
+      receiver: to,
+      messageId,
+    };
 
-  socket.on("send-request", async ({ requestedTo, request }) => {
-    io.to(users[requestedTo]).emit("send-request", { request });
-  });
-
-  socket.on("unsend-request", async ({ requestedTo, requestedBy }) => {
-    console.log(requestedBy, requestedTo);
-    io.to(users[requestedTo]).emit("unsend-request", { requestedBy });
-  });
-
-  socket.on("unfriend-request", async ({ from, to }) => {
-    io.to(users[to]).emit("unfriend-request", { from });
-  });
-
-  socket.on("delete-message", ({from, to, messageId}) => {
-    console.log(from, to)
-    io.to(users[to]).emit("delete-message", { from, messageId });
+    await deleteMessagePublisher(infoObj);
   });
 
   // Handle user disconnection
-  socket.on("disconnect", () => {
+  socket.on("disconnect", async() => {
     for (const [username, id] of Object.entries(users)) {
       if (id === socket.id) {
         delete users[username];
-        io.emit("user_offline", username);
+        // io.emit("user_offline", username);
+        await disconnectUserPublisher({username})
         console.log("User disconnected:", username);
         break;
       }
@@ -153,4 +193,4 @@ io.on("connection", (socket) => {
   });
 });
 
-export { server };
+export { server, io, users };

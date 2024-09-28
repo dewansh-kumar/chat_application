@@ -26,7 +26,7 @@ const axiosInterceptor = () => {
           return api(originalRequest);
         } catch (refreshError) {
           // Refresh token failed, redirect to login
-          if (window.location.pathname === "/login") {
+          if (window.location.pathname === "/login" || window.location.pathname === "/register") {
             return;
           } else {
             window.location.href = "/login";

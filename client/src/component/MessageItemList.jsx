@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 // * eslint-disable react/prop-types */
 import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
 import { useState, useEffect } from "react";
@@ -56,54 +57,53 @@ export const MessageItemList = ({ onSelectUser }) => {
   };
 
   useEffect(() => {
-    onAcceptRequest(({ friend }) => {
+    onAcceptRequest(({ sender }) => {
       setFriendsDetails((preFriends) => {
-        return [...preFriends, friend];
+        return [...preFriends, sender];
       });
       setRequestedByMeDetails((previous) => {
         return previous.filter((item) => {
-          return item.userName !== friend.friendInfo.userName;
+          return item.userName !== sender.friendInfo.userName;
         });
       });
     });
 
-    onSendRequest(({ request }) => {
+    onSendRequest(({ sender }) => {
       setRequestsDetails((preRequests) => {
-        return [...preRequests, request];
+        return [...preRequests, sender];
       });
     });
 
-    onRejectRequest(({ requestedTo }) => {
+    onRejectRequest(({ sender }) => {
       setRequestedByMeDetails((previous) => {
         return previous.filter((item) => {
-          return item.userName !== requestedTo;
+          return item.userName !== sender;
         });
       });
     });
 
-    onUnSendRequest(({ requestedBy }) => {
-      console.log(requestedBy);
+    onUnSendRequest(({ sender }) => {
       setRequestsDetails((previous) => {
         return previous.filter((item) => {
-          return item.requestInfo.userName !== requestedBy;
+          return item.requestInfo.userName !== sender;
         });
       });
     });
 
-    onUnFriendRequest(({ from }) => {
+    onUnFriendRequest(({ sender }) => {
       setFriendsDetails((previous) => {
         return previous.filter((item) => {
-          return item.friendInfo.userName !== from;
+          return item.friendInfo.userName !== sender;
         });
       });
     });
 
     return () => {
-      socket.off("accept-request");
-      socket.off("send-request");
-      socket.off("reject-request");
-      socket.off("unsend-request");
-      socket.off("unFriend-request");
+      socket.off("accept_request");
+      socket.off("send_request");
+      socket.off("reject_request");
+      socket.off("unSend_request");
+      socket.off("unfriend_request");
     };
   }, []);
 

@@ -100,8 +100,7 @@ export const getMessages = async (
   currentUserId,
   selectedUserId,
   page,
-  limit,
-  
+  limit
 ) => {
   // return await axios.get(`${API_URL}/message/getMessages`, {
   //   params: {
@@ -217,10 +216,7 @@ export const searchUsers = async (query) => {
   return await api.get(`/user/search?query=${query}`);
 };
 
-export const deleteMessageApi = async (
-  messageId,
-  isDeletedByReceiver,
-) => {
+export const deleteMessageApi = async (messageId, isDeletedByReceiver) => {
   api = axiosInterceptor();
   try {
     // return await axios.delete(`${API_URL}/message/deleteMessage`, {
@@ -232,5 +228,27 @@ export const deleteMessageApi = async (
     });
   } catch (error) {
     console.error("Getting error while deleting the message: ", error);
+  }
+};
+
+export const sendMessageApi = async (
+  senderId,
+  receiverId,
+  messageId,
+  message,
+  timestamp
+) => {
+  console.log(senderId, receiverId, messageId, message, timestamp);
+  api = axiosInterceptor();
+  try {
+    return await api.post("message/sendMessage", {
+      senderId,
+      receiverId,
+      messageId,
+      message,
+      timestamp,
+    });
+  } catch (error) {
+    console.error("Getting error while send the message", error);
   }
 };

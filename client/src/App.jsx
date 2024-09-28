@@ -43,7 +43,7 @@ const AppContent = () => {
     };
 
     fetchData();
-  }, [navigate]);
+  },[navigate]);
 
   return (
     <Routes>

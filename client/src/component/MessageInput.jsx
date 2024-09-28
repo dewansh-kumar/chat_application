@@ -10,6 +10,7 @@ import {
 } from "../stores/user/userAtom.js";
 import { messagesAtomState } from "../stores/message/messageAtom.js";
 import { messageAtomState } from "../stores/message/messageAtom.js";
+import { sendMessageApi } from "../service/api.jsx";
 
 export const MessageInput = () => {
   const [showPicker, setShowPicker] = useState(false);
@@ -36,7 +37,7 @@ export const MessageInput = () => {
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [showPicker]);
+  }, []);
 
   const generateMessageId = () => {
     const timestamp = Date.now().toString(36); // Convert to base-36 string
@@ -44,7 +45,7 @@ export const MessageInput = () => {
     return `${timestamp}-${randomSuffix}`;
   };
 
-  const handleSendMessage = () => {
+  const handleSendMessage = async () => {
     if (!message) {
       return;
     }
@@ -73,6 +74,14 @@ export const MessageInput = () => {
       },
     ]);
     setMessage("");
+
+    await sendMessageApi(
+      currentUser._id,
+      selectedUser._id,
+      uniqueID,
+      message,
+      Date.now()
+    );
     stopTyping(currentUser.userName, selectedUser.userName);
     clearTimeout(typingTimeoutRef.current);
   };

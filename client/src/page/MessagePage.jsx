@@ -23,7 +23,6 @@ import { friendsAtomState } from "../stores/friend/friendAtom.js";
 import { ChatUi } from "../component/ChatUi.jsx";
 import { useNavigate } from "react-router-dom";
 
-
 export const MessagePage = () => {
   const currentUser = useRecoilValue(currentUserAtomState);
   const selectedUser = useRecoilValue(selectedUserAtomState);
@@ -35,7 +34,7 @@ export const MessagePage = () => {
   const [isUserSelected, setIsUserSelected] = useState(false);
   // const selectedField = useRecoilValue(selectedFieldAtomState);
   const friends = useRecoilValue(friendsAtomState);
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   // const [isCallAccepted, setIsCallAccepted] = useState(false)
   useEffect(() => {
     // Register the username on the server
@@ -79,8 +78,8 @@ export const MessagePage = () => {
       setOnlineUsers(users);
     });
 
-    onUserOffline((user) => {
-      setOnlineUsers((prevUsers) => prevUsers.filter((u) => u !== user));
+    onUserOffline(({ username }) => {
+      setOnlineUsers((prevUsers) => prevUsers.filter((u) => u !== username));
     });
 
     return () => {
@@ -112,7 +111,7 @@ export const MessagePage = () => {
   };
 
   const handleBackToChatList = () => {
-    navigate("/")
+    navigate("/");
     setIsUserSelected(false);
   };
 
@@ -124,7 +123,6 @@ export const MessagePage = () => {
 
   return (
     <div className="h-screen bg-gray-300 p-[1vh]">
-      
       <div className="grid grid-cols-1 md:grid-cols-[30%_69%] lg:grid-cols-[25%_74%] gap-x-[1%] h-full">
         {/* Message List */}
         <div
@@ -169,4 +167,3 @@ export const MessagePage = () => {
     </div>
   );
 };
-

@@ -1,5 +1,36 @@
+import { logMessageToKafka } from "../kafka/kafkaProducer.js";
 import { Message } from "../model/message.model.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
+
+const USING_KAFKA = process.env.USING_KAFKA;
+export const sendMessage = asyncHandler(async (req, res) => {
+  const { senderId, receiverId, messageId, message, timestamp } = req.body;
+  // console.log(senderId, receiverId, messageId, message, timestamp);
+
+  if (USING_KAFKA === "true") {
+    // console.log("Step 1: USING_KAFKA and log message to kafka");
+    logMessageToKafka(senderId, receiverId, messageId, message, timestamp);
+  } else {
+    const newMessage = await Message.create({
+      sender: senderId,
+      receiver: receiverId,
+      messageId,
+      message,
+      timestamp,
+    });
+
+    if (!newMessage) {
+      return res.status(400).send({
+        message: "Getting error while send the message",
+      });
+    }
+
+    return res.status(200).send({
+      message: "message save to database successfully",
+      data: newMessage,
+    });
+  }
+});
 
 export const getMessages = asyncHandler(async (req, res) => {
   const { senderId, receiverId, page = 1, limit = 100 } = req.query;

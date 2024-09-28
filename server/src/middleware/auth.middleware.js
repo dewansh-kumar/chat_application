@@ -4,7 +4,6 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 
 export const verifyJWT = asyncHandler(async (req, res, next) => {
   const accessToken = req.cookies?.accessToken || null;
-
   if (!accessToken) {
     return res.status(401).send({
       success: false,

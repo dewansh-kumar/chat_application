@@ -28,7 +28,7 @@ export const sendEmail = async (to, isVerified, text) => {
       mailOptions = {
         from: process.env.HOST, // Sender address
         to: to, // List of recipients
-        subject: "Email Verified Successfuly", // Subject line
+        subject: "Email Verified Successfully", // Subject line
         html: successfullyVerifyEmailTemplate(), // Plain text body
       };
     }

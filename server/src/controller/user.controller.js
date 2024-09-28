@@ -242,7 +242,7 @@ export const sendOtp = asyncHandler(async (req, res) => {
   try {
     // console.log("dfjjk")
     isOtpSendToEmail = await sendEmail(email, false, otp);
-    console.log("Dewansh Shaw");
+    // console.log("Dewansh Shaw");
   } catch (error) {
     return res.status(500).send({
       success: false,
@@ -250,7 +250,7 @@ export const sendOtp = asyncHandler(async (req, res) => {
     });
   }
 
-  console.log(isOtpSendToEmail);
+  // console.log(isOtpSendToEmail);
 
   if (!isOtpSendToEmail) {
     return res.status(500).send({
@@ -323,7 +323,7 @@ export const verifyOtp = asyncHandler(async (req, res) => {
     });
   }
 
-  console.log(generatedOtp.expiresAt + " " + Date.now());
+  // console.log(generatedOtp.expiresAt + " " + Date.now());
 
   if (generatedOtp.expiresAt < new Date()) {
     await Otp.findOneAndDelete({ email });
@@ -355,7 +355,7 @@ export const verifyOtp = asyncHandler(async (req, res) => {
 export const generateAccessTokenUsingRefreshToken = asyncHandler(
   async (req, res) => {
     const incomingRefreshToken = req.cookies?.refreshToken || null;
-   
+
     if (!incomingRefreshToken) {
       return res.status(403).send({
         success: false,
@@ -453,7 +453,7 @@ export const uploadProfilePic = asyncHandler(async (req, res) => {
   const profileLocalPath = req.file?.path;
 
   if (!profileLocalPath) {
-    return res.status(401).res({
+    return res.status(401).send({
       message: "File is not uploaded to the local machine",
     });
   }
